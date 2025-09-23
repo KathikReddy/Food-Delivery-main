@@ -6,7 +6,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y git
 
 # Clone repo
-RUN git clone https://github.com/KathikReddy/Food-Delivery-main-backend.git .
+RUN git clone https://github.com/KathikReddy/backend.git .
 
 # Move to backend folder
 WORKDIR /app/backend
