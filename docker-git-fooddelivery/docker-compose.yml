@@ -1,36 +1,51 @@
-version: "3.8"
-
 services:
-  mysql:
-    image: mysql:8
-    container_name: mysql-db
+  db:
+    image: mysql:8.0
+    container_name: food-db
+    restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: food_delivery
+      MYSQL_ROOT_PASSWORD: root
     ports:
       - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
+    networks:
+      - food-net
 
   backend:
-    build: ./backend
+    build:
+      context: .                   # root folder
+      dockerfile: Dockerfile.backend
     container_name: food-backend
-    ports:
-      - "8081:8081"
+    restart: always
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/food_delivery
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/food_delivery
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
     depends_on:
-      - mysql
+      - db
+    ports:
+      - "8081:8081"
+    networks:
+      - food-net
 
   frontend:
-    build: ./frontend
+    build:
+      context: .                   # root folder
+      dockerfile: Dockerfile.frontend
     container_name: food-frontend
+    restart: always
     ports:
       - "80:80"
     depends_on:
       - backend
+    networks:
+      - food-net
 
 volumes:
   db_data:
+
+networks:
+  food-net:
