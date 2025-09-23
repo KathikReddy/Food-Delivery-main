@@ -1,0 +1,28 @@
+# ---------- Build stage ----------
+FROM node:18 AS builder
+WORKDIR /app
+
+# Install git to allow repo cloning
+RUN apt-get update && apt-get install -y git
+
+# Clone your frontend repository (replace URL with your repo)
+RUN git clone https://github.com/KathikReddy/Food-Delivery-main-frontend.git .
+
+# Install dependencies
+RUN npm install
+
+# Build React app for production
+RUN npm run build
+
+# ---------- Run stage ----------
+FROM nginx:alpine
+WORKDIR /usr/share/nginx/html
+
+# Copy built React app from builder stage
+COPY --from=builder /app/build .
+
+# Expose port 80
+EXPOSE 80
+
+# Start Nginx
+CMD ["nginx", "-g", "daemon off;"]

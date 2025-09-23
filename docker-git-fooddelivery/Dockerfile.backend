@@ -1,0 +1,28 @@
+# ---------- Build stage ----------
+FROM maven:3.9.6-eclipse-temurin-21 AS builder
+WORKDIR /app
+
+# Install git to allow repo cloning
+RUN apt-get update && apt-get install -y git
+
+# Clone your backend repository (replace URL with your repo)
+RUN git clone https://github.com/KathikReddy/Food-Delivery-main-backend.git .
+
+# Build the Spring Boot JAR (skip tests for faster builds)
+RUN --mount=type=cache,target=/root/.m2 mvn clean package -DskipTests
+
+# ---------- Run stage ----------
+FROM eclipse-temurin:21-jre
+WORKDIR /app
+
+# Copy the built JAR from builder stage
+COPY --from=builder /app/target/*.jar app.jar
+
+# Expose backend port
+EXPOSE 8081
+
+# Optional: environment variables for Spring Boot
+ENV JAVA_OPTS=""
+
+# Run the Spring Boot JAR
+ENTRYPOINT ["java", "-jar", "app.jar"]
